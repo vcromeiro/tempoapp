@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+
+  # Auth-API
+  auth:
+    image: node
+    hostname: auth
+    build:
+      context: auth-api
+      dockerfile: Dockerfile
+    networks:
+      backend:
+        aliases:
+          - auth
+    volumes:
+      - ./auth-api/src:/api
+    ports:
+      - "3003:3003"
+    environment:
+      - AUTH_PG_DIALECT=postgres
+      - AUTH_PG_DB=auth2
+      - AUTH_PG_USER=postgres
+      - AUTH_PG_PASS=XXXXXXXX
+      - AUTH_PG_HOST=postgres
+      - AUTH_PG_PORT=5432
+      - AUTH_API_PORT=3003
+      - AUTH_NODE_ENV=development
+      - AUTH_API_KEY=XXXXXXXX
+    command: /api/start.sh
+
+  # Auth-API
+  tempoapp:
+    image: node
+    hostname: tempoapp
+    build:
+      context: tempoapp
+      dockerfile: Dockerfile
+    networks:
+      backend:
+        aliases:
+          - auth
+    volumes:
+      - ./tempoapp/src:/app
+    ports:
+      - "3000:3000"
+    command: /app/start.sh
+
+  # PostgreSQL
+  postgres:
+    image: postgres
+    hostname: postgres
+    build: 
+      context: postgres
+      dockerfile: Dockerfile
+    volumes:
+      - ${ROOT_DIR}/${POSTGRES_DIR}:/data
+      - /etc/resolv.conf:/etc/resolv.conf
+    ports:
+      - "5432:5432"
+    networks:
+      backend:
+        aliases:
+          - postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=XXXXXXXX
+      - POSTGRES_DB=auth2
+
+networks:
+  backend:
+    driver: bridge
