@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import api from '../../services/api';
-// import { Link } from 'react-router-dom';
+import ls from 'local-storage';
 
 import { Container, Form, Div } from './styles';
 
@@ -10,6 +10,7 @@ import WeatherList from '../../components/weatherList';
 export default class Main extends Component {
 
    state = {
+      loading: false,
       weather: null,
       username: '',
       cityName: '',
@@ -17,19 +18,32 @@ export default class Main extends Component {
    }
 
    componentDidMount(){
-      
+      this.setState({ 
+         username: ls.get('username') || ''
+      });
    }
 
    loadWeather = async (username, cityName, state) => {
-      const response = await api.get(
-         `/climate?username=${username}&cityName=${cityName}&state=${state}`
-      );
 
-      this.setState({ 
-         weather: response.data
-      });
+      this.setState({ loading: true });
 
-      console.log(response.data);
+      try {
+         const response = await api.get(
+            `/climate?username=${username}&cityName=${cityName}&state=${state}`
+         );
+   
+         this.setState({ 
+            weather: response.data
+         });
+   
+         console.log(response.data);
+      } catch (error) {
+         console.log(error);
+      } finally {
+         this.setState({ 
+            loading: false
+         });
+      }
    }
 
    handleChange = event => {
@@ -48,14 +62,13 @@ export default class Main extends Component {
          this.state.cityName, 
          this.state.state
       );
+      ls.set('username', this.state.username);
       
       console.log("STATE REACT");
       console.log(this.state.weather);
    }
 
    render(){
-      
-      // const { weather, username, cityName, state } = this.state;
 
       const weatherList = this.state.weather;
       let weatherComponent = null;
@@ -68,7 +81,10 @@ export default class Main extends Component {
         } else {           
            this.state.weather.data.forEach((date) => {
                if (date.rain.precipitation > 1 && alertRain === null) {
-                  alertRain = 'Atenção! Alerta de chuva em sua região!';
+                  alertRain = [
+                     'Atenção! Alerta de chuva em sua região! ',
+                     <i className="fa fa-umbrella" />
+                  ];
                }
            });        
             weatherComponent = [
@@ -88,7 +104,7 @@ export default class Main extends Component {
                      <li>
                         <ul>
                            <label>Username:</label>
-                           <input type="text" name="username" onChange={this.handleChange} autoFocus />
+                           <input type="text" name="username" value={this.state.username} onChange={this.handleChange} autoFocus />
                         </ul>
                         <ul>
                            <label>City Name:</label>
@@ -99,7 +115,9 @@ export default class Main extends Component {
                            <input type="text" name="state" onChange={this.handleChange} />
                         </ul>
                         <ul>
-                           <button type="submit">Search Weather</button>
+                           <button type="submit" disabled={this.state.loading}>
+                              {this.state.loading ? <i className="fa fa-spinner fa-pulse" /> : 'Search Weather'}
+                           </button>
                         </ul>
                      </li>
                      <h1>{alert}</h1>

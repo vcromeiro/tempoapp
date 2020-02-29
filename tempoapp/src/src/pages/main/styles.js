@@ -27,7 +27,7 @@ export const Form = styled.form `
     button {
         height: 55px;
         padding: 0 20px;
-        background: #da552f;
+        background: #6290C3;
         border: 0;
         font-size: 20px;
         font-weight: bold;
@@ -36,7 +36,7 @@ export const Form = styled.form `
         width: 100%;
 
         &:hover {
-            background: #96391e;
+            background: #2D4259;
             cursor: pointer;
         }
     }
