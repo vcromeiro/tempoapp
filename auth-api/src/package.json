@@ -16,7 +16,7 @@
   "author": "Victor Romeiro",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bcrypt-nodejs": "0.0.3",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
